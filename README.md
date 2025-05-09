@@ -49,7 +49,7 @@ FarmFinance is a full-stack MERN application that empowers farmers to track expe
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/FarmFinance.git
+   git clone https://github.com/riyank036/FarmFinance.git
    cd FarmFinance
    ```
 
