@@ -54,7 +54,23 @@ const LoginPage = () => {
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded">
-              {error}
+              {error.includes('create an account first') ? (
+                <div className="flex flex-col space-y-3">
+                  <strong>{error.split('.')[0]}.</strong>
+                  <div className="bg-green-50 p-3 border border-green-200 rounded-md text-center">
+                    <Link 
+                      to="/register" 
+                      className="flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 mx-auto my-2 w-full max-w-xs"
+                    >
+                      <span>Sign Up Now</span>
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                      </svg>
+                    </Link>
+                    <p className="text-sm text-green-700 mt-1">Create your farm account in just a few steps</p>
+                  </div>
+                </div>
+              ) : error}
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">

@@ -96,6 +96,7 @@ const AuthProvider = ({ children }) => {
                 return true;
             }
         } catch (error) {
+            // Pass through the exact error message from the server when available
             setError(
                 error.response?.data?.message ||
                 'Login failed. Please check your credentials.'

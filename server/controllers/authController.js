@@ -80,7 +80,7 @@ exports.login = async (req, res, next) => {
     const user = await User.findOne({ email });
     if (!user) {
       return res.status(401).json({
-        message: 'Invalid credentials'
+        message: 'You need to create an account first before logging in. Please click on Register to get started.'
       });
     }
 
