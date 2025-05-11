@@ -166,39 +166,39 @@ const ExpenseForm = ({ onSuccess, initialData }) => {
             <option value="">{t('expenses.selectCategory')}</option>
             
             <option disabled>--- {t('expenses.cropRelated')} ---</option>
-            <option value="Seeds & Plants">Seeds & Plants</option>
-            <option value="Fertilizers">Fertilizers</option>
-            <option value="Pesticides">Pesticides</option>
-            <option value="Crop Protection">Crop Protection</option>
+            <option value="Seeds & Plants">{t('expenses.Seeds & Plants')}</option>
+            <option value="Fertilizers">{t('expenses.Fertilizers')}</option>
+            <option value="Pesticides">{t('expenses.Pesticides')}</option>
+            <option value="Crop Protection">{t('expenses.Crop Protection')}</option>
             
             <option disabled>--- {t('expenses.utilities')} ---</option>
-            <option value="Electricity & Water">Electricity & Water</option>
-            <option value="Fuel">Fuel</option>
+            <option value="Electricity & Water">{t('expenses.Electricity & Water')}</option>
+            <option value="Fuel">{t('expenses.Fuel')}</option>
             
             <option disabled>--- {t('expenses.labor')} ---</option>
-            <option value="Labor">Labor</option>
+            <option value="Labor">{t('expenses.Labor')}</option>
             
             <option disabled>--- {t('expenses.equipment')} ---</option>
-            <option value="Machinery Rental">Machinery Rental</option>
-            <option value="Equipment Maintenance">Equipment Maintenance</option>
+            <option value="Machinery Rental">{t('expenses.Machinery Rental')}</option>
+            <option value="Equipment Maintenance">{t('expenses.Equipment Maintenance')}</option>
             
             <option disabled>--- {t('expenses.logistics')} ---</option>
-            <option value="Transportation">Transportation</option>
-            <option value="Storage & Warehousing">Storage & Warehousing</option>
+            <option value="Transportation">{t('expenses.Transportation')}</option>
+            <option value="Storage & Warehousing">{t('expenses.Storage & Warehousing')}</option>
             
             <option disabled>--- {t('expenses.finance')} ---</option>
-            <option value="Land Lease">Land Lease</option>
-            <option value="Loan Interest">Loan Interest</option>
-            <option value="Insurance">Insurance</option>
-            <option value="MSP Registration">MSP Registration</option>
-            <option value="Market Fees">Market Fees</option>
+            <option value="Land Lease">{t('expenses.Land Lease')}</option>
+            <option value="Loan Interest">{t('expenses.Loan Interest')}</option>
+            <option value="Insurance">{t('expenses.Insurance')}</option>
+            <option value="MSP Registration">{t('expenses.MSP Registration')}</option>
+            <option value="Market Fees">{t('expenses.Market Fees')}</option>
             
             <option disabled>--- {t('expenses.livestock')} ---</option>
-            <option value="Animal Feed">Animal Feed</option>
+            <option value="Animal Feed">{t('expenses.Animal Feed')}</option>
             
             <option disabled>--- {t('expenses.other')} ---</option>
-            <option value="Other">Other</option>
-            <option value="custom">{t('expenses.addCustomCategory')}</option>
+            <option value="Other">{t('expenses.Other')}</option>
+            <option value="custom">{t('expenses.addNewCategory')}</option>
             
             {/* Add a dynamic option for the custom category if it's not empty and not in the list */}
             {formData.category && 
@@ -225,9 +225,6 @@ const ExpenseForm = ({ onSuccess, initialData }) => {
                 >
                   {t('common.add')}
                 </button>
-              </div>
-              <div className="mt-1 text-xs text-red-500 dark:text-red-400">
-                {t('common.englishInputOnly')}
               </div>
             </div>
           )}
