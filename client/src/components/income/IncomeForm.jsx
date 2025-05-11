@@ -225,7 +225,6 @@ const IncomeForm = ({ onSuccess, initialData }) => {
             <option value="Cauliflower">{t('income.Cauliflower')}</option>
             <option value="Cabbage">{t('income.Cabbage')}</option>
             <option value="ladyfinger/Bhinda">{t('income.ladyfinger/Bhinda')}</option>
-            <option value="Leafy Vegetables">{t('income.Leafy Vegetables')}</option>
             <option value="Other Vegetables">{t('income.Other Vegetables')}</option>
             
             <option disabled>--- {t('income.fruits')} ---</option>
