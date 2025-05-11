@@ -35,13 +35,6 @@ const IncomeForm = ({ onSuccess, initialData }) => {
     'Bajra',
     'Jowar',
     
-    // Pulses
-    'Chickpeas/Chana',
-    'Pigeon Peas/Tur Dal',
-    'Green Gram/Moong Dal',
-    'Black Gram/Urad Dal',
-    'Lentils/Masoor Dal',
-    
     // Commercial Crops
     'Sugarcane',
     'Cotton',
@@ -49,14 +42,13 @@ const IncomeForm = ({ onSuccess, initialData }) => {
     'Tobacco',
     
     // Vegetables
-    'Chili','Brinjal',
+    'Chili',
+    'Brinjal',
     'Tomato',
-    'Onion',
     
     'Cauliflower',
     'Cabbage',
-    'ladyfinger/Bhinda',
-    'Leafy Vegetables',
+    'ladyfinger',
     'Other Vegetables',
     
     // Fruits
@@ -64,19 +56,26 @@ const IncomeForm = ({ onSuccess, initialData }) => {
     'Banana',
     'Grapes',
     'Papaya',
-    'Guava',
     'Other Fruits',
+    
+    // tuberous root vegetable
+    'Potato',
+    'Elephant Foot Yam/Suran',
+    'Yam/Ratadu',
+    'sweet potatoes/Sakkariya',
+    'Carrot',
+    'Onion',
+    'Garlic',
+    'Ginger',
     
     // Animal Products
     'Milk',
     'Eggs',
     'Poultry',
-    'Meat',
     'Fish',
     'Honey',
     
     // Other
-    'Herbs & Medicinal Plants',
     'Custom'
   ];
   
@@ -206,55 +205,52 @@ const IncomeForm = ({ onSuccess, initialData }) => {
             <option value="">{t('income.selectProduct')}</option>
             
             <option disabled>--- {t('income.grainsCereals')} ---</option>
-            <option value="Rice">Rice</option>
-            <option value="Wheat">Wheat</option>
-            <option value="Corn">Corn</option>
-            <option value="Bajra">Bajra</option>
-            <option value="Jowar">Jowar</option>
+            <option value="Rice">{t('income.Rice')}</option>
+            <option value="Wheat">{t('income.Wheat')}</option>
+            <option value="Corn">{t('income.Corn')}</option>
+            <option value="Bajra">{t('income.Bajra')}</option>
+            <option value="Jowar">{t('income.Jowar')}</option>
             
-            <option disabled>--- {t('income.pulses')} ---</option>
-            <option value="Chickpeas/Chana">Chickpeas/Chana</option>
-            <option value="Pigeon Peas/Tur Dal">Pigeon Peas/Tur Dal</option>
-            <option value="Green Gram/Moong Dal">Green Gram/Moong Dal</option>
-            <option value="Black Gram/Urad Dal">Black Gram/Urad Dal</option>
-            <option value="Lentils/Masoor Dal">Lentils/Masoor Dal</option>
             
             <option disabled>--- {t('income.commercialCrops')} ---</option>
-            <option value="Sugarcane">Sugarcane</option>
-            <option value="Cotton">Cotton</option>
-            <option value="Oilseeds">Oilseeds</option>
-            <option value="Tobacco">Tobacco</option>
+            <option value="Sugarcane">{t('income.Sugarcane')}</option>
+            <option value="Cotton">{t('income.Cotton')}</option>
+            <option value="Oilseeds">{t('income.Oilseeds')}</option>
+            <option value="Tobacco">{t('income.Tobacco')}</option>
             
             <option disabled>--- {t('income.vegetables')} ---</option>
-            <option value="Chili">Chili</option>
-            <option value="Brinjal">Brinjal</option>
-            <option value="Tomato">Tomato</option>
-            <option value="Onion">Onion</option>
-            <option value="Cauliflower">Cauliflower</option>
-            <option value="Cabbage">Cabbage</option>
-            <option value="ladyfinger/Bhinda">ladyfinger/Bhinda</option>
-            <option value="Leafy Vegetables">Leafy Vegetables</option>
-            <option value="Other Vegetables">Other Vegetables</option>
+            <option value="Chili">{t('income.Chili')}</option>
+            <option value="Brinjal">{t('income.Brinjal')}</option>
+            <option value="Tomato">{t('income.Tomato')}</option>
+            <option value="Cauliflower">{t('income.Cauliflower')}</option>
+            <option value="Cabbage">{t('income.Cabbage')}</option>
+            <option value="ladyfinger/Bhinda">{t('income.ladyfinger/Bhinda')}</option>
+            <option value="Leafy Vegetables">{t('income.Leafy Vegetables')}</option>
+            <option value="Other Vegetables">{t('income.Other Vegetables')}</option>
             
             <option disabled>--- {t('income.fruits')} ---</option>
-            <option value="Mango">Mango</option>
-            <option value="Banana">Banana</option>
-            <option value="Grapes">Grapes</option>
-            <option value="Papaya">Papaya</option>
-            <option value="Guava">Guava</option>
-            <option value="Other Fruits">Other Fruits</option>
+            <option value="Mango">{t('income.Mango')}</option>
+            <option value="Banana">{t('income.Banana')}</option>
+            <option value="Grapes">{t('income.Grapes')}</option>
+            <option value="Papaya">{t('income.Papaya')}</option>
+            <option value="Other Fruits">{t('income.Other Fruits')}</option>
+
+            <option disabled>--- {t('income.tuberousRootVegetable')} ---</option>
+            <option value="Potato">{t('income.Potato')}</option>
+            <option value="Elephant Foot Yam/Suran">{t('income.Elephant Foot Yam/Suran')}</option>
+            <option value="Yam/Ratadu">{t('income.Yam/Ratadu')}</option>
+            <option value="sweet potatoes/Sakkariya">{t('income.sweet potatoes/Sakkariya')}</option>
+            <option value="Carrot">{t('income.Carrot')}</option>
             
             <option disabled>--- {t('income.animalProducts')} ---</option>
-            <option value="Milk">Milk</option>
-            <option value="Eggs">Eggs</option>
-            <option value="Poultry">Poultry</option>
-            <option value="Meat">Meat</option>
-            <option value="Fish">Fish</option>
-            <option value="Honey">Honey</option>
+            <option value="Milk">{t('income.Milk')}</option>
+            <option value="Eggs">{t('income.Eggs')}</option>
+            <option value="Poultry">{t('income.Poultry')}</option>
+            <option value="Fish">{t('income.Fish')}</option>
+            <option value="Honey">{t('income.Honey')}</option>
             
             <option disabled>--- {t('income.other')} ---</option>
-            <option value="Herbs & Medicinal Plants">Herbs & Medicinal Plants</option>
-            <option value="custom">{t('income.addCustomProduct')}</option>
+            <option value="custom">{t('income.addNewProduct')}</option>
             
             {/* Add a dynamic option for the custom product if it's not empty and not in the list */}
             {formData.product && 
@@ -281,9 +277,6 @@ const IncomeForm = ({ onSuccess, initialData }) => {
                 >
                   {t('common.add')}
                 </button>
-              </div>
-              <div className="mt-1 text-xs text-red-500 dark:text-red-400">
-                {t('common.englishInputOnly')}
               </div>
             </div>
           )}
