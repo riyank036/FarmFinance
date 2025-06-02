@@ -1,12 +1,12 @@
 import { useState } from 'react';
-import { FaEdit, FaTrash, FaSearch } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaSearch, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { formatCurrency, formatDate } from '../../utils/formatters';
 import Spinner from '../../shared/components/ui/Spinner.jsx';
 import Alert from '../ui/Alert';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 
-const IncomeList = ({ incomes, isLoading, onDelete, onEdit }) => {
+const IncomeList = ({ incomes, isLoading, onDelete, onEdit, pagination, onPageChange }) => {
   const { t } = useTranslation();
   // We use darkMode indirectly through className conditionals
   const { darkMode } = useTheme(); // eslint-disable-line no-unused-vars
@@ -27,6 +27,13 @@ const IncomeList = ({ incomes, isLoading, onDelete, onEdit }) => {
   const handleDelete = (income) => {
     if (window.confirm(t('income.confirmDelete', { product: income.product, amount: formatCurrency(income.totalAmount) }))) {
       onDelete(income._id);
+    }
+  };
+
+  // Handle page change
+  const handlePageChange = (newPage) => {
+    if (onPageChange && newPage > 0 && newPage <= (pagination?.pages || 1)) {
+      onPageChange(newPage);
     }
   };
 
@@ -139,6 +146,41 @@ const IncomeList = ({ incomes, isLoading, onDelete, onEdit }) => {
               ))}
             </tbody>
           </table>
+          
+          {/* Pagination controls */}
+          {pagination && pagination.pages > 1 && (
+            <div className="flex justify-center items-center space-x-2 mt-6">
+              <button
+                onClick={() => handlePageChange(pagination.page - 1)}
+                disabled={pagination.page === 1}
+                className={`p-2 rounded ${
+                  pagination.page === 1
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+                aria-label="Previous page"
+              >
+                <FaChevronLeft className="h-4 w-4" />
+              </button>
+              
+              <div className="text-sm text-gray-700 dark:text-gray-300">
+                Page {pagination.page} of {pagination.pages}
+              </div>
+              
+              <button
+                onClick={() => handlePageChange(pagination.page + 1)}
+                disabled={pagination.page === pagination.pages}
+                className={`p-2 rounded ${
+                  pagination.page === pagination.pages
+                    ? 'text-gray-400 cursor-not-allowed'
+                    : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700'
+                }`}
+                aria-label="Next page"
+              >
+                <FaChevronRight className="h-4 w-4" />
+              </button>
+            </div>
+          )}
         </div>
       )}
     </div>

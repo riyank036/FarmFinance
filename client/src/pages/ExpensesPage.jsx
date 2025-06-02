@@ -14,11 +14,16 @@ const ExpensesPage = () => {
   const [error, setError] = useState('');
   const [selectedExpense, setSelectedExpense] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 100,
+    pages: 1
+  });
   
   // Fetch expenses when component mounts
   useEffect(() => {
     fetchExpenses();
-  }, []);
+  }, [pagination.page]);
   
   // Fetch all expenses
   const fetchExpenses = async () => {
@@ -26,10 +31,13 @@ const ExpensesPage = () => {
       setIsLoading(true);
       setError('');
       
-      const response = await expenseAPI.getExpenses();
+      const response = await expenseAPI.getExpenses(pagination.page, pagination.limit);
       
       if (response.success) {
         setExpenses(response.data);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
       }
     } catch (error) {
       setError(t('expenses.loadError'));
@@ -37,6 +45,14 @@ const ExpensesPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // Handle page change
+  const handlePageChange = (page) => {
+    setPagination(prev => ({
+      ...prev,
+      page
+    }));
   };
   
   // Delete an expense
@@ -103,6 +119,8 @@ const ExpensesPage = () => {
           isLoading={isLoading}
           onDelete={handleDelete}
           onEdit={handleEdit}
+          pagination={pagination}
+          onPageChange={handlePageChange}
         />
       )}
     </div>

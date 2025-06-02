@@ -6,60 +6,79 @@ const { expenseSchema, updateExpenseSchema } = require('../validation/expenseSch
 // @access  Private
 exports.getExpenses = async (req, res, next) => {
   try {
-    const { 
-      page = 1, 
-      limit = 10, 
-      sort = '-date',
-      category,
-      startDate,
-      endDate,
-      isRecurring,
-      tags
-    } = req.query;
+    // Get query parameters
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const sort = req.query.sort || '-date';
+    const category = req.query.category;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+    const isRecurring = req.query.isRecurring;
+    const tags = req.query.tags;
 
-    // Build filter object
-    const filter = { user: req.user.id };
+    // Create filter object
+    let filter = { user: req.user.id };
 
-    if (category) filter.category = category;
-    if (isRecurring) filter.isRecurring = isRecurring === 'true';
+    // Add category filter
+    if (category) {
+      filter.category = category;
+    }
+
+    // Add recurring filter
+    if (isRecurring) {
+      filter.isRecurring = isRecurring === 'true';
+    }
     
-    // Add date range filter if provided
+    // Add date filter
     if (startDate || endDate) {
       filter.date = {};
-      if (startDate) filter.date.$gte = new Date(startDate);
-      if (endDate) filter.date.$lte = new Date(endDate);
+      
+      if (startDate) {
+        filter.date.$gte = new Date(startDate);
+      }
+      
+      if (endDate) {
+        filter.date.$lte = new Date(endDate);
+      }
     }
     
-    // Add tags filter if provided
+    // Add tags filter
     if (tags) {
-      // Handle comma-separated tags
-      const tagArray = tags.split(',').map(tag => tag.trim().toLowerCase());
-      filter.tags = { $in: tagArray };
+      const tagArray = tags.split(',');
+      const cleanedTags = [];
+      
+      for (let i = 0; i < tagArray.length; i++) {
+        cleanedTags.push(tagArray[i].trim().toLowerCase());
+      }
+      
+      filter.tags = { $in: cleanedTags };
     }
 
-    // Get pagination values
-    const pageNum = parseInt(page, 10);
-    const limitNum = parseInt(limit, 10);
-    const skip = (pageNum - 1) * limitNum;
+    // Calculate pagination
+    const skip = (page - 1) * limit;
 
-    // Execute query with pagination
+    // Get expenses
     const expenses = await Expense.find(filter)
       .sort(sort)
       .skip(skip)
-      .limit(limitNum)
+      .limit(limit)
       .lean();
 
-    // Get total count for pagination
+    // Count total expenses
     const total = await Expense.countDocuments(filter);
     
+    // Calculate total pages
+    const totalPages = Math.ceil(total / limit);
+    
+    // Send response
     res.json({
       success: true,
       count: expenses.length,
-      total,
+      total: total,
       pagination: {
-        page: pageNum,
-        limit: limitNum,
-        pages: Math.ceil(total / limitNum)
+        page: page,
+        limit: limit,
+        pages: totalPages
       },
       data: expenses
     });
@@ -73,32 +92,46 @@ exports.getExpenses = async (req, res, next) => {
 // @access  Private
 exports.getExpenseStats = async (req, res, next) => {
   try {
-    // Get total expenses by category
+    // Get category summary
     const categorySummary = await Expense.getTotalByCategory(req.user.id);
     
-    // Get today's expenses
+    // Get today's date
     const today = new Date();
     today.setHours(0, 0, 0, 0);
+    
+    // Get tomorrow's date
     const tomorrow = new Date(today);
     tomorrow.setDate(tomorrow.getDate() + 1);
     
+    // Get today's expenses
     const todayExpenses = await Expense.find({
       user: req.user.id,
       date: { $gte: today, $lt: tomorrow }
     }).lean();
     
-    // Get this month's expenses
+    // Calculate total for today
+    let totalToday = 0;
+    for (let i = 0; i < todayExpenses.length; i++) {
+      totalToday += todayExpenses[i].amount;
+    }
+    
+    // Get first day of month
     const firstDayOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+    
+    // Get last day of month
     const lastDayOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
     
+    // Get monthly expenses
     const monthlyExpenses = await Expense.find({
       user: req.user.id,
       date: { $gte: firstDayOfMonth, $lte: lastDayOfMonth }
     }).lean();
     
-    // Calculate totals
-    const totalToday = todayExpenses.reduce((sum, exp) => sum + exp.amount, 0);
-    const totalThisMonth = monthlyExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    // Calculate total for month
+    let totalThisMonth = 0;
+    for (let i = 0; i < monthlyExpenses.length; i++) {
+      totalThisMonth += monthlyExpenses[i].amount;
+    }
     
     // Get recurring expenses
     const recurringExpenses = await Expense.find({
@@ -106,12 +139,17 @@ exports.getExpenseStats = async (req, res, next) => {
       isRecurring: true
     }).lean();
     
-    const totalRecurring = recurringExpenses.reduce((sum, exp) => sum + exp.amount, 0);
+    // Calculate total recurring
+    let totalRecurring = 0;
+    for (let i = 0; i < recurringExpenses.length; i++) {
+      totalRecurring += recurringExpenses[i].amount;
+    }
     
+    // Send response
     res.json({
       success: true,
       data: {
-        categorySummary,
+        categorySummary: categorySummary,
         todayExpenses: {
           count: todayExpenses.length,
           total: totalToday
@@ -136,9 +174,12 @@ exports.getExpenseStats = async (req, res, next) => {
 // @access  Private
 exports.getExpense = async (req, res, next) => {
   try {
+    const expenseId = req.params.id;
+    const userId = req.user.id;
+    
     const expense = await Expense.findOne({
-      _id: req.params.id,
-      user: req.user.id
+      _id: expenseId,
+      user: userId
     }).lean();
 
     if (!expense) {
@@ -162,10 +203,12 @@ exports.getExpense = async (req, res, next) => {
 // @access  Private
 exports.createExpense = async (req, res, next) => {
   try {
-    // Validate expense data with Zod
+    // Validate expense data
     const validationResult = expenseSchema.safeParse(req.body);
+    
     if (!validationResult.success) {
       const formattedErrors = validationResult.error.format();
+      
       return res.status(400).json({
         success: false,
         message: 'Validation error',
@@ -173,14 +216,16 @@ exports.createExpense = async (req, res, next) => {
       });
     }
 
-    const validatedData = validationResult.data;
+    // Get validated data
+    const expenseData = validationResult.data;
     
-    // Create expense with validated data and user ID
-    const expense = await Expense.create({
-      ...validatedData,
-      user: req.user.id
-    });
+    // Add user ID to expense data
+    expenseData.user = req.user.id;
+    
+    // Create expense
+    const expense = await Expense.create(expenseData);
 
+    // Send response
     res.status(201).json({
       success: true,
       data: expense
@@ -195,10 +240,12 @@ exports.createExpense = async (req, res, next) => {
 // @access  Private
 exports.updateExpense = async (req, res, next) => {
   try {
-    // Validate update data with Zod
+    // Validate update data
     const validationResult = updateExpenseSchema.safeParse(req.body);
+    
     if (!validationResult.success) {
       const formattedErrors = validationResult.error.format();
+      
       return res.status(400).json({
         success: false,
         message: 'Validation error',
@@ -206,82 +253,37 @@ exports.updateExpense = async (req, res, next) => {
       });
     }
 
-    const validatedData = validationResult.data;
+    // Get expense ID and user ID
+    const expenseId = req.params.id;
+    const userId = req.user.id;
     
-    // Find expense and check ownership
-    let expense = await Expense.findById(req.params.id);
+    // Check if expense exists and belongs to user
+    const existingExpense = await Expense.findOne({
+      _id: expenseId,
+      user: userId
+    });
 
-    if (!expense) {
+    if (!existingExpense) {
       return res.status(404).json({
         success: false,
         message: 'Expense not found'
       });
     }
 
-    // Make sure user owns the expense
-    if (expense.user.toString() !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this expense'
-      });
-    }
-
-    // Update with validated data
-    expense = await Expense.findByIdAndUpdate(
-      req.params.id,
-      validatedData,
-      {
-        new: true,
-        runValidators: true
-      }
+    // Get validated data
+    const updateData = validationResult.data;
+    
+    // Update expense
+    const updatedExpense = await Expense.findByIdAndUpdate(
+      expenseId,
+      updateData,
+      { new: true }
     );
 
+    // Send response
     res.json({
       success: true,
-      data: expense
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// @desc    Update expense status
-// @route   PATCH /api/expenses/:id/status
-// @access  Private
-exports.updateExpenseStatus = async (req, res, next) => {
-  try {
-    const { status } = req.body;
-    
-    if (!status || !['pending', 'completed', 'cancelled'].includes(status)) {
-      return res.status(400).json({
-        success: false,
-        message: 'Valid status is required (pending, completed, or cancelled)'
-      });
-    }
-    
-    let expense = await Expense.findById(req.params.id);
-
-    if (!expense) {
-      return res.status(404).json({
-        success: false,
-        message: 'Expense not found'
-      });
-    }
-
-    // Make sure user owns the expense
-    if (expense.user.toString() !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to update this expense'
-      });
-    }
-    
-    // Use the model method to update status
-    await expense.updateStatus(status);
-    
-    res.json({
-      success: true,
-      data: expense
+      data: updatedExpense
     });
   } catch (error) {
     next(error);
@@ -293,7 +295,14 @@ exports.updateExpenseStatus = async (req, res, next) => {
 // @access  Private
 exports.deleteExpense = async (req, res, next) => {
   try {
-    const expense = await Expense.findById(req.params.id);
+    const expenseId = req.params.id;
+    const userId = req.user.id;
+    
+    // Find and delete expense
+    const expense = await Expense.findOneAndDelete({
+      _id: expenseId,
+      user: userId
+    });
 
     if (!expense) {
       return res.status(404).json({
@@ -302,19 +311,9 @@ exports.deleteExpense = async (req, res, next) => {
       });
     }
 
-    // Make sure user owns the expense
-    if (expense.user.toString() !== req.user.id) {
-      return res.status(403).json({
-        success: false,
-        message: 'Not authorized to delete this expense'
-      });
-    }
-
-    await expense.deleteOne();
-
     res.json({
       success: true,
-      data: {}
+      message: 'Expense deleted successfully'
     });
   } catch (error) {
     next(error);
@@ -346,6 +345,53 @@ exports.getExpensesByDateRange = async (req, res, next) => {
       success: true,
       count: expenses.length,
       data: expenses
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @desc    Update expense status
+// @route   PATCH /api/expenses/:id/status
+// @access  Private
+exports.updateExpenseStatus = async (req, res, next) => {
+  try {
+    const expenseId = req.params.id;
+    const userId = req.user.id;
+    const { status } = req.body;
+    
+    // Validate status
+    if (!status || typeof status !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Status is required and must be a string'
+      });
+    }
+    
+    // Check if expense exists and belongs to user
+    const existingExpense = await Expense.findOne({
+      _id: expenseId,
+      user: userId
+    });
+
+    if (!existingExpense) {
+      return res.status(404).json({
+        success: false,
+        message: 'Expense not found'
+      });
+    }
+
+    // Update expense status
+    const updatedExpense = await Expense.findByIdAndUpdate(
+      expenseId,
+      { status },
+      { new: true }
+    );
+
+    // Send response
+    res.json({
+      success: true,
+      data: updatedExpense
     });
   } catch (error) {
     next(error);

@@ -36,6 +36,7 @@ function App() {
         <ThemeProvider>
           <Router>
             <AuthProvider>
+              <div className="app-container">
               <Routes>
                 {/* Public Routes */}
                 <Route path="/login" element={<LoginPage />} />
@@ -55,17 +56,60 @@ function App() {
                   
                 {/* Admin Routes */}
                 <Route element={<AdminRoute />}>
-                  <Route path="/admin" element={<AdminLayout><UserManagement /></AdminLayout>} />
-                  <Route path="/admin/users" element={<AdminLayout><UserManagement /></AdminLayout>} />
-                  <Route path="/admin/transactions" element={<AdminLayout><TransactionManagement /></AdminLayout>} />
-                  <Route path="/admin/monthly" element={<AdminLayout><MonthlyFinancialData /></AdminLayout>} />
-                  <Route path="/admin/feedback" element={<AdminLayout><FeedbackManagement /></AdminLayout>} />
-                  <Route path="/admin/profile" element={<AdminLayout><AdminProfile /></AdminLayout>} />
+                    <Route 
+                      path="/admin" 
+                      element={
+                        <AdminLayout>
+                          <UserManagement />
+                        </AdminLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/users" 
+                      element={
+                        <AdminLayout>
+                          <UserManagement />
+                        </AdminLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/transactions" 
+                      element={
+                        <AdminLayout>
+                          <TransactionManagement />
+                        </AdminLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/monthly" 
+                      element={
+                        <AdminLayout>
+                          <MonthlyFinancialData />
+                        </AdminLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/feedback" 
+                      element={
+                        <AdminLayout>
+                          <FeedbackManagement />
+                        </AdminLayout>
+                      } 
+                    />
+                    <Route 
+                      path="/admin/profile" 
+                      element={
+                        <AdminLayout>
+                          <AdminProfile />
+                        </AdminLayout>
+                      } 
+                    />
                 </Route>
 
                 {/* 404 Page */}
                 <Route path="*" element={<NotFoundPage />} />
               </Routes>
+              </div>
             </AuthProvider>
           </Router>
         </ThemeProvider>

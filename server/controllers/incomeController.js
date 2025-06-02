@@ -6,13 +6,60 @@ const { incomeSchema, updateIncomeSchema } = require('../validation/incomeSchema
 // @access  Private
 exports.getIncomes = async (req, res, next) => {
   try {
-    const incomes = await Income.find({ user: req.user.id })
-      .sort({ date: -1 })
+    // Get query parameters
+    const page = req.query.page ? parseInt(req.query.page) : 1;
+    const limit = req.query.limit ? parseInt(req.query.limit) : 10;
+    const sort = req.query.sort || '-date';
+    const product = req.query.product;
+    const startDate = req.query.startDate;
+    const endDate = req.query.endDate;
+
+    // Create filter object
+    let filter = { user: req.user.id };
+
+    // Add product filter
+    if (product) {
+      filter.product = product;
+    }
+    
+    // Add date filter
+    if (startDate || endDate) {
+      filter.date = {};
+      
+      if (startDate) {
+        filter.date.$gte = new Date(startDate);
+      }
+      
+      if (endDate) {
+        filter.date.$lte = new Date(endDate);
+      }
+    }
+
+    // Calculate pagination
+    const skip = (page - 1) * limit;
+
+    // Get income entries
+    const incomes = await Income.find(filter)
+      .sort(sort)
+      .skip(skip)
+      .limit(limit)
       .lean();
+
+    // Count total income entries
+    const total = await Income.countDocuments(filter);
+    
+    // Calculate total pages
+    const totalPages = Math.ceil(total / limit);
     
     res.json({
       success: true,
       count: incomes.length,
+      total: total,
+      pagination: {
+        page: page,
+        limit: limit,
+        pages: totalPages
+      },
       data: incomes
     });
   } catch (error) {

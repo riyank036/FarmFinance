@@ -15,11 +15,16 @@ const IncomePage = () => {
   const [error, setError] = useState('');
   const [selectedIncome, setSelectedIncome] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [pagination, setPagination] = useState({
+    page: 1,
+    limit: 100,
+    pages: 1
+  });
   
   // Fetch income entries when component mounts
   useEffect(() => {
     fetchIncomes();
-  }, []);
+  }, [pagination.page]);
   
   // Fetch all income entries
   const fetchIncomes = async () => {
@@ -27,10 +32,13 @@ const IncomePage = () => {
       setIsLoading(true);
       setError('');
       
-      const response = await incomeAPI.getIncomes();
+      const response = await incomeAPI.getIncomes(pagination.page, pagination.limit);
       
       if (response.success) {
         setIncomes(response.data);
+        if (response.pagination) {
+          setPagination(response.pagination);
+        }
       }
     } catch (error) {
       setError(t('income.loadError'));
@@ -38,6 +46,14 @@ const IncomePage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  // Handle page change
+  const handlePageChange = (page) => {
+    setPagination(prev => ({
+      ...prev,
+      page
+    }));
   };
   
   // Delete an income entry
@@ -104,6 +120,8 @@ const IncomePage = () => {
           isLoading={isLoading}
           onDelete={handleDelete}
           onEdit={handleEdit}
+          pagination={pagination}
+          onPageChange={handlePageChange}
         />
       )}
     </div>

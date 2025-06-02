@@ -57,8 +57,8 @@ axios.interceptors.response.use(
 // Expense API calls
 export const expenseAPI = {
   // Get all expenses
-  getExpenses: async () => {
-    const response = await axios.get(EXPENSE_ENDPOINTS.BASE);
+  getExpenses: async (page = 1, limit = 100) => {
+    const response = await axios.get(`${EXPENSE_ENDPOINTS.BASE}?page=${page}&limit=${limit}`);
     return response.data;
   },
 
@@ -90,8 +90,8 @@ export const expenseAPI = {
 // Income API calls
 export const incomeAPI = {
   // Get all income entries
-  getIncomes: async () => {
-    const response = await axios.get(INCOME_ENDPOINTS.BASE);
+  getIncomes: async (page = 1, limit = 100) => {
+    const response = await axios.get(`${INCOME_ENDPOINTS.BASE}?page=${page}&limit=${limit}`);
     return response.data;
   },
 

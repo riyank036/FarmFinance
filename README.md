@@ -22,7 +22,6 @@ FarmFinance is a comprehensive financial management application designed specifi
 - React Router (for navigation)
 - i18next (for internationalization)
 - Axios (for API requests)
-- Firebase (for authentication)
 
 ### Backend
 - Node.js

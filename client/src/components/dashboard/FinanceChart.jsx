@@ -1,81 +1,68 @@
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { getMonthName } from '../../utils/formatters';
 import { useTheme } from '../../context/ThemeContext';
 import { useTranslation } from 'react-i18next';
 import { useState, useEffect } from 'react';
 
+// This component shows a chart of finance data
 const FinanceChart = ({ data }) => {
   const { darkMode } = useTheme();
   const { t } = useTranslation();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 640);
+  const [isMobile, setIsMobile] = useState(false);
   
-  // Handle resize events
+  // Check if screen is mobile size
   useEffect(() => {
-    const handleResize = () => {
+    function checkIfMobile() {
       setIsMobile(window.innerWidth < 640);
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    }
+    
+    checkIfMobile();
+    window.addEventListener('resize', checkIfMobile);
+    
+    return () => window.removeEventListener('resize', checkIfMobile);
   }, []);
   
-  // Format data for the chart
-  const formattedData = data?.map(item => ({
-    ...item,
-    month: getMonthName(item.month).substring(0, 3),
-  })) || [];
-
-  // Custom tooltip to display values
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className={`${darkMode ? 'bg-gray-800 border-gray-700 text-white' : 'bg-white border-gray-200 text-gray-800'} p-2 sm:p-3 shadow-md rounded-md border text-xs sm:text-sm`}>
-          <p className="font-semibold">{label}</p>
-          {payload.map((entry, index) => (
-            <p 
-              key={`item-${index}`} 
-              style={{ color: entry.color }}
-              className="text-xs sm:text-sm"
-            >
-              {`${entry.name}: ₹${entry.value.toFixed(2)}`}
-            </p>
-          ))}
-        </div>
-      );
-    }
+  // Format the data for the chart
+  let formattedData = [];
   
-    return null;
-  };
+  if (data) {
+    for (let i = 0; i < data.length; i++) {
+      let item = data[i];
+      let monthName = getMonthName(item.month);
+      let shortMonth = monthName.substring(0, 3);
+      
+      formattedData.push({
+        month: shortMonth,
+        income: item.income,
+        expenses: item.expenses,
+        profit: item.profit
+      });
+    }
+  }
 
-  // Use reduced margins and simplified view on mobile
-  const chartMargins = isMobile 
-    ? { top: 5, right: 10, left: 0, bottom: 5 } 
-    : { top: 5, right: 30, left: 20, bottom: 5 };
+  // Function to get month name
+  function getMonthName(monthNum) {
+    const months = [
+      "January", "February", "March", "April", "May", "June",
+      "July", "August", "September", "October", "November", "December"
+    ];
+    
+    if (monthNum >= 1 && monthNum <= 12) {
+      return months[monthNum - 1];
+    } else {
+      return "";
+    }
+  }
 
   return (
-    <div className="card dark:bg-gray-800 dark:border-gray-700 h-64 sm:h-80 p-4 sm:p-6">
+    <div className={darkMode ? "card dark:bg-gray-800 dark:border-gray-700 h-64 sm:h-80 p-4 sm:p-6" : "card bg-white h-64 sm:h-80 p-4 sm:p-6"}>
       <h3 className="text-base sm:text-lg font-medium text-gray-700 dark:text-gray-200 mb-2 sm:mb-4 heading-text">{t('dashboard.monthlyOverview')}</h3>
       <ResponsiveContainer width="100%" height="90%">
-        <BarChart
-          data={formattedData}
-          margin={chartMargins}
-        >
+        <BarChart data={formattedData}>
           <CartesianGrid strokeDasharray="3 3" stroke={darkMode ? "#374151" : "#e5e7eb"} />
-          <XAxis 
-            dataKey="month" 
-            tick={{ fill: darkMode ? "#9ca3af" : "#4b5563", fontSize: isMobile ? 10 : 12 }}
-            tickMargin={5}
-          />
-          <YAxis 
-            tick={{ fill: darkMode ? "#9ca3af" : "#4b5563", fontSize: isMobile ? 10 : 12 }} 
-            width={isMobile ? 30 : 40}
-            tickFormatter={value => isMobile ? (value >= 1000 ? `${(value/1000).toFixed(0)}k` : value) : value}
-          />
-          <Tooltip content={<CustomTooltip />} />
-          <Legend 
-            wrapperStyle={{ color: darkMode ? "#ffffff" : "#000000", fontSize: isMobile ? 10 : 12 }}
-            iconSize={isMobile ? 8 : 10}
-          />
+          <XAxis dataKey="month" />
+          <YAxis />
+          <Tooltip />
+          <Legend />
           <Bar dataKey="income" name={t('financial.income')} fill="#22c55e" />
           <Bar dataKey="expenses" name={t('financial.expenses')} fill="#ef4444" />
           <Bar dataKey="profit" name={t('financial.profit')} fill="#3b82f6" />

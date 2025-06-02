@@ -1,40 +1,33 @@
 const mongoose = require('mongoose');
 
+// Create expense schema
 const expenseSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
-    required: [true, 'User ID is required'],
-    index: true
+    required: true
   },
   category: {
     type: String,
-    required: [true, 'Category is required'],
-    trim: true,
-    minlength: [2, 'Category must be at least 2 characters'],
-    maxlength: [50, 'Category cannot exceed 50 characters']
+    required: true,
+    trim: true
   },
   amount: {
     type: Number,
-    required: [true, 'Amount is required'],
-    min: [0, 'Amount must be a positive number']
+    required: true
   },
   date: {
     type: Date,
-    required: [true, 'Date is required'],
+    required: true,
     default: Date.now
   },
   note: {
     type: String,
-    trim: true,
-    maxlength: [500, 'Note cannot exceed 500 characters']
+    trim: true
   },
   paymentMethod: {
     type: String,
-    enum: {
-      values: ['cash', 'credit', 'bank', 'other'],
-      message: '{VALUE} is not a valid payment method'
-    },
+    enum: ['cash', 'credit', 'bank', 'other'],
     default: 'cash'
   },
   isRecurring: {
@@ -46,52 +39,54 @@ const expenseSchema = new mongoose.Schema({
     default: []
   },
   receiptImage: {
-    type: String, // URL to image storage
+    type: String,
     default: ''
   },
   status: {
     type: String,
-    enum: {
-      values: ['pending', 'completed', 'cancelled'],
-      message: '{VALUE} is not a valid status'
-    },
+    enum: ['pending', 'completed', 'cancelled'],
     default: 'completed'
   }
 }, {
-  timestamps: true,
-  toJSON: { virtuals: true },
-  toObject: { virtuals: true }
+  timestamps: true
 });
 
-// Index for faster queries
+// Add indexes for searching
 expenseSchema.index({ user: 1, date: -1 });
 expenseSchema.index({ category: 1 });
-expenseSchema.index({ isRecurring: 1 });
-expenseSchema.index({ tags: 1 });
-expenseSchema.index({ createdAt: 1 });
 
-// Virtual for formatted date
+// Method to get formatted date
 expenseSchema.virtual('formattedDate').get(function() {
-  return this.date ? this.date.toLocaleDateString() : '';
+  if (this.date) {
+    return this.date.toLocaleDateString();
+  } else {
+    return '';
+  }
 });
 
-// Virtual to check if expense is recent (within last 7 days)
+// Method to check if expense is recent (within last 7 days)
 expenseSchema.virtual('isRecent').get(function() {
   const oneWeekAgo = new Date();
   oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-  return this.date >= oneWeekAgo;
+  
+  if (this.date >= oneWeekAgo) {
+    return true;
+  } else {
+    return false;
+  }
 });
 
-// Methods for business logic
+// Method to update expense status
 expenseSchema.methods.updateStatus = async function(newStatus) {
-  if (!['pending', 'completed', 'cancelled'].includes(newStatus)) {
+  if (newStatus === 'pending' || newStatus === 'completed' || newStatus === 'cancelled') {
+    this.status = newStatus;
+    return await this.save();
+  } else {
     throw new Error('Invalid status value');
   }
-  this.status = newStatus;
-  return this.save();
 };
 
-// Static method to find expenses by date range
+// Method to find expenses by date range
 expenseSchema.statics.findByDateRange = function(userId, startDate, endDate) {
   return this.find({
     user: userId,
@@ -102,35 +97,47 @@ expenseSchema.statics.findByDateRange = function(userId, startDate, endDate) {
   }).sort({ date: -1 });
 };
 
-// Static method to get total expenses by category
+// Method to get total expenses by category
 expenseSchema.statics.getTotalByCategory = async function(userId) {
   const result = await this.aggregate([
-    { $match: { user: new mongoose.Types.ObjectId(userId) } },
-    { $group: { 
-      _id: "$category", 
-      total: { $sum: "$amount" },
-      count: { $sum: 1 }
-    }},
-    { $sort: { total: -1 } }
+    { 
+      $match: { 
+        user: new mongoose.Types.ObjectId(userId) 
+      } 
+    },
+    { 
+      $group: { 
+        _id: "$category", 
+        total: { $sum: "$amount" },
+        count: { $sum: 1 }
+      }
+    },
+    { 
+      $sort: { 
+        total: -1 
+      } 
+    }
   ]);
   
   return result;
 };
 
-// Mongoose middleware - pre-save hook
-expenseSchema.pre('save', function(next) {
-  // If no specific transformations needed, just pass to next middleware
-  next();
-});
-
-// Middleware to format tags before saving (lowercase and remove duplicates)
+// Make tags lowercase before saving
 expenseSchema.pre('save', function(next) {
   if (this.isModified('tags')) {
-    // Transform tags to lowercase
-    this.tags = this.tags.map(tag => tag.toLowerCase());
+    // Make all tags lowercase
+    for (let i = 0; i < this.tags.length; i++) {
+      this.tags[i] = this.tags[i].toLowerCase();
+    }
     
-    // Remove duplicates
-    this.tags = [...new Set(this.tags)];
+    // Remove duplicate tags
+    const uniqueTags = [];
+    for (let i = 0; i < this.tags.length; i++) {
+      if (!uniqueTags.includes(this.tags[i])) {
+        uniqueTags.push(this.tags[i]);
+      }
+    }
+    this.tags = uniqueTags;
   }
   next();
 });
